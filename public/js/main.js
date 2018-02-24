@@ -1,0 +1,47 @@
+$(function () {
+    const url = 'http://127.0.0.1:3000';
+    let _username = '';
+    let _$inputname = $('#name');
+    let _$loginButton = $('#loginbutton');
+
+    let socket = io.connect(url);
+
+    //设置用户名，当用户登录的时候触发
+    let setUsername = () => {
+
+        _username = _$inputname.val().trim();    //得到输入框中用户输入的用户名
+
+        //判断用户名是否存在
+        if (_username) {
+            socket.emit('login', { username: _username });   //如果用户名存在，就代表可以登录了，我们就触发登录事件，就相当于告诉服务器我们要登录了
+        }
+        else {
+            alert('请输入用户名！');
+        }
+    };
+
+
+
+    /*前端事件*/
+    _$loginButton.on('click', function (event) {    //监听按钮的点击事件，如果点击，就说明用户要登录，就执行setUsername函数
+        setUsername();
+    });
+
+    /*socket.io部分逻辑*/
+    socket.on('loginResult', (data) => {
+        /** 
+        * 如果服务器返回的用户名和刚刚发送的相同的话，就登录 
+        * 否则说明有地方出问题了，拒绝登录 
+        */
+        if (data.code === 0) {
+            // 登陆成功，切换至聊天室页面  
+        }
+        else if (data.code === 1) {
+            alert('用户已登录！');
+        }
+        else {
+            alert('登录失败！');
+        }
+    })
+
+});
