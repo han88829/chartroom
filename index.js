@@ -33,7 +33,7 @@ app.use('/', express.static(path.join(__dirname, './public')));        //一句�
 io.on('connection', (socket) => {              //监听客户端的连接事件  
 
     socket.on('login', (data) => {
-
+        console.log('成功连接！');
         if (checkUserName(data)) {
             socket.emit('loginResult', { code: 1 });   //code=1 用户已登录 
         }
@@ -49,7 +49,16 @@ io.on('connection', (socket) => {              //监听客户端的连接事件
         }
 
     });
-
+    // 接收发送消息
+    socket.on('sendMessage', (data) => {
+        for (const key of users) {
+            if (key.username === data.username) {
+                key.message.push(data.message);
+                io.emit('receiveMessage', data);
+                break;
+            }
+        }
+    })
     //断开连接后做的事情  
     socket.on('disconnect', () => {          //注意，该事件不需要自定义触发器，系统会自动调用  
         usersNum = users.length;

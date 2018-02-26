@@ -3,7 +3,7 @@ $(function () {
     let _username = '';
     let _$inputname = $('#name');
     let _$loginButton = $('#loginbutton');
-
+    let _$chattextarea = $('#chatmessage');
     let socket = io.connect(url);
 
     //设置用户名，当用户登录的时候触发
@@ -35,6 +35,7 @@ $(function () {
         */
         if (data.code === 0) {
             // 登陆成功，切换至聊天室页面  
+            showChatRoom();
         }
         else if (data.code === 1) {
             alert('用户已登录！');
@@ -43,5 +44,58 @@ $(function () {
             alert('登录失败！');
         }
     })
+
+    // 登录成功显示聊天对话框
+    let showChatRoom = () => {
+        $('#loginbox').hide('slow');
+        _$loginButton.off('click');
+        /** 
+        * 显示聊天界面，并显示一行文字，欢迎用户 
+        */
+        $(`<div class="title">欢迎${_username}来到ddvdd聊天室</div>`).insertBefore($("#content"));
+        $("#chatbox").show('slow');
+    }
+
+    let sendMessage = function () {
+        /** 
+         * 得到输入框的聊天信息，如果不为空，就触发sendMessage 
+         * 将信息和用户名发送过去 
+         */
+        let _message = _$chattextarea.val();
+
+        if (_message) {
+            socket.emit('sendMessage', { username: _username, message: _message });
+        }
+        else {
+            alert('请输入发送消息！');
+        }
+    };
+
+    /*聊天事件*/
+    _$chattextarea.on('keyup', function (event) {
+        if (event.keyCode === 13) {
+            sendMessage();
+            _$chattextarea.val('');
+        }
+    });
+
+    socket.on('receiveMessage', (data) => {
+
+        /** 
+         * 
+         * 监听服务器广播的消息
+         */
+        showMessage(data);
+    })
+    //显示消息
+    let showMessage = function (data) {
+        console.log(data)
+        //先判断这个消息是不是自己发出的，然后再以不同的样式显示  
+        if (data.username === _username) {
+            $("#content").append(`<p class='self-message'><span class='msg'>${data.message}</span><span class='name'> :${data.username}</span></p>`);
+        } else {
+            $("#content").append(`<p class='other-message'><span class='name'>${data.username}: </span><span class='msg'>${data.message}</span></p>`);
+        }
+    };
 
 });
