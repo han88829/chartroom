@@ -1,5 +1,5 @@
 $(function () {
-    const url = 'http://193.112.15.145:3000';
+    const url = 'http://127.0.0.1:3000';
     let _username = '';
     let _$inputname = $('#name');
     let _$loginButton = $('#loginbutton');
